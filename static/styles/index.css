@@ -1,8 +1,15 @@
 :root{
-    --mybgcolor:#292929;
-    --mytextcolor:#fff;
+    --mybgcolor:#1f2022;
+    --mytextcolor:#edf0f1;
 }
 body{
     background: var(--mybgcolor);
     color: var(--mytextcolor);
+    /* color: #eeeeee !important;
+    background-color: #222222 !important; */
+}
+.jumbotron{
+    background-color: #929292;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    color: rgb(42, 42, 42);
 }
