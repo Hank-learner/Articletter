@@ -10,13 +10,19 @@
 
 #### Requirements
 
-1.flask module
+1. python3,pip
 
-2.python3
+2. flask module(pip install flask)
+
+3. mysql(sudo apt-get install mysql-server libmysqlclient-dev)(pip install flask-mysqldb)(pip install Flask-WTF)(pip install passlib)
+
+basic structure of database is given in sqlinit.sql file, donot directly run it , see the contents
+and update mysql password in app.py file
 
 requirements.txt contains the packages and modules needed in pi venv, just run the command in your environment
 
 ```sh
+source /path/to/venvfolder/bin/activate
 pip install -r requirements.txt
 ```
 
