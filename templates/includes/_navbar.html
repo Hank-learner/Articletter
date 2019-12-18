@@ -12,7 +12,16 @@
 				<a class="nav-item nav-link" href="/">Home</a>
 				<a class="nav-item nav-link" href="/about">About</a>
 				<a class="nav-item nav-link" href="/articles">Articles</a>
-				<a class="nav-item nav-link btn btn-info text-white" href="/register">Register</a>
+				&nbsp;&nbsp;
+				{% if session.logged_in %}
+					<a class="nav-item nav-link" href="/dashboard">Account</a>
+					&nbsp;&nbsp;
+					<a class="nav-item nav-link btn btn-info text-white" href="/logout">Logout</a>
+				{% else %}
+					<a class="nav-item nav-link btn btn-info text-white" href="/register">Register</a>&nbsp
+					<a class="nav-item nav-link btn btn-info text-white" href="/login">Login</a>
+				{% endif %}
+
 			</div>
 		</div>
 	</div>

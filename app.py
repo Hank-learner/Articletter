@@ -94,6 +94,66 @@ def register():
     return render_template("register.html", form=form)
 
 
+# Login - sign in route
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password_candidate = request.form["password"]
+
+        cursor = mysql.connection.cursor()
+        result = cursor.execute("SELECT * FROM users WHERE username=%s", [username])
+
+        if result > 0:
+            data = cursor.fetchone()
+            password = data["password"]
+
+            if sha256_crypt.verify(password_candidate, password):
+                session["logged_in"] = True
+                session["username"] = username
+                flash("You are now logged in", "success")
+                return redirect(url_for("dashboard"))
+
+            else:
+                error = "Invalid Username or password"
+                return render_template("login.html", error=error)
+
+        else:
+            error = "User not found"
+            return render_template("login.html", error=error)
+
+        cursor.close()
+
+    return render_template("login.html")
+
+
+# function check user login
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if "logged_in" in session:
+            return f(*args, **kwargs)
+        else:
+            flash("User not found, please login to continue", "danger")
+            return redirect(url_for("login"))
+
+    return wrap
+
+
+# logout route
+@app.route("/logout")
+def logout():
+    session.clear()
+    flash("You are now logged out", "success")
+    return redirect(url_for("login"))
+
+
+# dashboard route
+@app.route("/dashboard")
+@is_logged_in
+def dashboard():
+    return render_template("dashboard.html")
+
 
 if __name__ == "__main__":
     app.secret_key = "secret123"
