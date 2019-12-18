@@ -17,6 +17,7 @@ import logging
 
 # starting a flask app
 app = Flask(__name__)
+app.secret_key = "secret123"
 
 # flask-mysql database connection
 app.config["MYSQL_HOST"] = "localhost"
@@ -156,7 +157,6 @@ def dashboard():
 
 
 if __name__ == "__main__":
-    app.secret_key = "secret123"
     # app.run()
     # app.run(debug=True,host='0.0.0.0',port="12345")
     app.run(debug=True, port=7000)
