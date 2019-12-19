@@ -8,7 +8,6 @@ from flask import (
     request,
     logging,
 )
-from data import Articles
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, PasswordField, TextAreaField, validators
 from passlib.hash import sha256_crypt
@@ -28,8 +27,9 @@ app.config["MYSQL_CURSORCLASS"] = "DictCursor"
 # mysql initialization
 mysql = MySQL(app)
 
-# articles from data.py
-Articles = Articles()
+# # articles from data.py
+# from data import Articles
+# Articles = Articles()
 
 # index route
 @app.route("/")
@@ -46,13 +46,28 @@ def about():
 # list all articles route
 @app.route("/articles")
 def articles():
-    return render_template("articles.html", articles=Articles)
+    # mysql execution
+    cursor = mysql.connection.cursor()
+    result = cursor.execute("SELECT * FROM  articles")
+    articles = cursor.fetchall()
+
+    if result > 0:
+        return render_template("articles.html", articles=articles)
+    else:
+        msg = "No articles found"
+        return render_template("articles.html", msg=msg)
+
+    cursor.close()
 
 
 # Single article route
 @app.route("/article/<string:id>/")
 def article(id):
-    return render_template("article.html", id=id)
+    cursor = mysql.connection.cursor()
+    result = cursor.execute("SELECT * FROM  articles WHERE id=%s", [id])
+    article = cursor.fetchone()
+    return render_template("article.html", article=article)
+    cursor.close()
 
 
 # Register form class template
@@ -81,6 +96,7 @@ def register():
         username = form.username.data
         password = sha256_crypt.encrypt(str(form.password.data))
 
+        # mysql execution
         cursor = mysql.connection.cursor()
         cursor.execute(
             "INSERT INTO  users(name,email,username,password) VALUES (%s,%s,%s,%s)",
@@ -102,6 +118,7 @@ def login():
         username = request.form["username"]
         password_candidate = request.form["password"]
 
+        # mysql execution
         cursor = mysql.connection.cursor()
         result = cursor.execute("SELECT * FROM users WHERE username=%s", [username])
 
@@ -143,6 +160,7 @@ def is_logged_in(f):
 
 # logout route
 @app.route("/logout")
+@is_logged_in
 def logout():
     session.clear()
     flash("You are now logged out", "success")
@@ -153,7 +171,49 @@ def logout():
 @app.route("/dashboard")
 @is_logged_in
 def dashboard():
-    return render_template("dashboard.html")
+    # mysql execution
+    cursor = mysql.connection.cursor()
+    result = cursor.execute(
+        "SELECT * FROM  articles where author=%s", [session["username"]]
+    )
+    articles = cursor.fetchall()
+
+    if result > 0:
+        return render_template("dashboard.html", articles=articles)
+    else:
+        msg = "No articles found"
+        return render_template("dashboard.html", msg=msg)
+
+    cursor.close()
+
+
+# Article form class template
+class ArticleForm(Form):
+    title = StringField("Title", [validators.Length(min=1, max=200)])
+    body = TextAreaField("Body", [validators.Length(min=30)])
+
+
+@app.route("/add_article", methods=["GET", "POST"])
+@is_logged_in
+def add_article():
+    form = ArticleForm(request.form)
+    if request.method == "POST" and form.validate():
+        title = form.title.data
+        body = form.body.data
+
+        # mysql execution
+        cursor = mysql.connection.cursor()
+        cursor.execute(
+            "INSERT INTO  articles(title,body,author) VALUES (%s,%s,%s);",
+            (title, body, session["username"]),
+        )
+        mysql.connection.commit()
+        cursor.close()
+
+        flash("Article successfully created", "success")
+        return redirect(url_for("dashboard"))
+
+    return render_template("add_article.html", form=form)
 
 
 if __name__ == "__main__":
