@@ -4,9 +4,24 @@
 
 <div class="jumbotron text-center">
     <h1>Hello from Articletter</h1>
+    <hr>
     <p class="lead">
         This application is built on flask framework and is the home for articles from all over the world
     </p>
+    <ul>
+        <li>Create and publish an article</li>
+        <li>View article created by any others in the world</li>
+        <li>Edit and delete articles realtime</li>
+    </ul>
+    <br>
+    <hr>
+    {% if session.logged_in == NULL %}
+    <h4>Get started:</h4>
+    <a href="/register" class="btn btn-primary btn-lg">Register</a>
+    <a href="/login" class="btn btn-success btn-lg">Login</a>
+    {% endif %}
+    <hr>
+    <h5>Know more on <a href="/about" class="btn btn-dark">About</a></h5>
 
 </div>
 
