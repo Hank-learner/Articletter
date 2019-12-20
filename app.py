@@ -193,6 +193,7 @@ class ArticleForm(Form):
     body = TextAreaField("Body", [validators.Length(min=30)])
 
 
+# Add article
 @app.route("/add_article", methods=["GET", "POST"])
 @is_logged_in
 def add_article():
@@ -214,6 +215,39 @@ def add_article():
         return redirect(url_for("dashboard"))
 
     return render_template("add_article.html", form=form)
+
+
+# Edit article
+@app.route("/edit_article/<string:id>/", methods=["GET", "POST"])
+@is_logged_in
+def edit_article(id):
+    # mysql execution
+    cursor = mysql.connection.cursor()
+    cursor.execute("SELECT * from articles WHERE id=%s", [id])
+    article = cursor.fetchone()
+
+    form = ArticleForm(request.form)
+    form.title.data = article["title"]
+    form.body.data = article["body"]
+
+    cursor.close()
+
+    if request.method == "POST" and form.validate():
+        title = request.form['title']
+        body = request.form['body']
+
+        # mysql execution
+        cursor = mysql.connection.cursor()
+        cursor.execute(
+            "UPDATE  articles SET title=%s,body=%s WHERE id=%s ", [title, body, id]
+        )
+        mysql.connection.commit()
+        cursor.close()
+
+        flash("Article successfully updated", "success")
+        return redirect(url_for("dashboard"))
+
+    return render_template("edit_article.html", form=form)
 
 
 if __name__ == "__main__":
