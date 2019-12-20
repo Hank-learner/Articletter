@@ -233,8 +233,8 @@ def edit_article(id):
     cursor.close()
 
     if request.method == "POST" and form.validate():
-        title = request.form['title']
-        body = request.form['body']
+        title = request.form["title"]
+        body = request.form["body"]
 
         # mysql execution
         cursor = mysql.connection.cursor()
@@ -248,6 +248,19 @@ def edit_article(id):
         return redirect(url_for("dashboard"))
 
     return render_template("edit_article.html", form=form)
+
+
+# Delete article
+@app.route("/delete_article/<string:id>/", methods=["POST"])
+@is_logged_in
+def delete_article(id):
+    # mysql execution
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM articles where id=%s", [id])
+    mysql.connection.commit()
+    cursor.close()
+    flash("Article deleted", "success")
+    return redirect(url_for("dashboard"))
 
 
 if __name__ == "__main__":
